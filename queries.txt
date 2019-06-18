@@ -1,0 +1,68 @@
+create table vehicle902( RegNo varchar2(20) not null, Maker varchar2(20), RegDate Date not null, ChassisNo numeric(15),
+EngineNo varchar2(20), Color varchar2(10), FuelType varchar2(20), constraint chassisNo_pk902 primary key(ChassisNo));
+
+create table policy902(PolicyNo Numeric(20) not null,  PolicyType varchar2(20) not null, FromDate Date, ToDate Date,
+InsuredAmt Numeric(10) not null, PremiumType varchar(20) not null, constraint policy_pk902 primary key(PolicyNo));
+
+create table PolicyHolder902( PolicyNo numeric(20), InsuredPersonName varchar2(20), Gender varchar2(15), Address varchar2(30),
+DOB Date, PhNo numeric(20), email varchar(20), constraint policyNo_fk902 foreign key(PolicyNo) references policy902(PolicyNo),
+constraint email_unqk unique(email), constraint phoneNo_pk902 primary key(PhNo));
+
+to delete a constraint:
+alter table PolicyHolder902 drop constraint phoneNo_pk902;
+
+to add a constraint:
+alter table PolicyHolder902 add constraint phoneNo_pk902 primary key(PhNo);
+
+search for a constraint:
+select constraint_name, constraint_type, search_condition from user_constraints where TABLE_NAME = 'POLICYHOLDER902';
+//table name within single quotes should be uppercase
+
+adding comments:
+comment on table PolicyHolder902 is 'test comment';
+
+view comments:
+select * from user_tab_comments where table_name = 'POLICYHOLDER902';
+
+insert into vehicle902 values('TN 17', 'Lamborghini', TO_DATE('2018/05/17', 'yyyy/mm/dd'), 12345, 'E98765', 'Blue', 'Petrol');
+insert into policy902 values(1923, 'Vehicle Ins.', TO_DATE('2018/03/06', 'yyyy/mm/dd'), TO_DATE('2020/03/05', 'yyyy/mm/dd'), 400000,'Annual');
+insert into policy902 values(1988, 'Vehicle Ins.', TO_DATE('2018/03/06', 'yyyy/mm/dd'), TO_DATE('2020/03/05', 'yyyy/mm/dd'), 10000,'Monthly');
+insert into PolicyHolder902 values(1717, 'Jade', 'Male', 'CH TN IN', TO_DATE('1999/02/02', 'yyyy/mm/dd'), 9876543222, 'jade@gmail.com');
+
+
+Date Manipulation:
+select policyNo, months_between(todate, fromdate) as months from policy902;
+select policyNo, round(months_between(todate,fromdate)/12) as years from policy902;
+select policyNo, trunc(months_between(todate,fromdate)/12) as years from policy902;
+
+Date between:
+select * from policy902 where fromdate between TO_DATE('<some date>','<date format>) and TO_DATE('<some date>','<date format>);
+
+Date condition:
+select * from policy902 where fromdate > TO_DATE('<some date>','<date format>) and todate < TO_DATE('<some date>','<date format>);
+select * from policy902 where fromdate > TO_DATE('<some date>','<date format>) or todate < TO_DATE('<some date>','<date format>);
+select * from policy902 where not(fromdate > TO_DATE('<some date>','<date format>));
+
+Date Difference:
+//fromdate todate can swap
+select policyNo, extract(day from FROMDATE) - extract(day from TODATE) as yearDiff from policy902;
+select policyNo, extract(years from TODATE) - extract(years from FROMDATE) as yearDiff from policy902;
+
+select to_char(fromdate, 'Day Month yyyy') from policy902;
+select to_date('2019/07/02', 'yyyy/mm/dd') from dual;
+select ascii('a') from dual;
+
+select nvl(age, '100') from tb1; //setting temporary val when null
+
+if else: 
+select PolicyNo, PolicyType, case PremiumType
+	when 'Annual' then 0.3*InsuredAmt
+	when 'Monthly' then 0.2*+InsuredAmt
+	else
+	    InsuredAmt
+	end "Bonus" from policy902;
+
+Equi Join:
+select p.policyno, p.policytype, ph.insuredpersonname, p.insuredamt from policy902 p, policyholder902 ph where p.policyno=ph.policyno;
+
+Non Equi:
